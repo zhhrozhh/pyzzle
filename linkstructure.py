@@ -4,23 +4,46 @@ try:
 except:
 	pass
 import networkx as nx
-#import matplotlib.pyplot as plt
-
 name2node = {}
 G = nx.DiGraph()
+def addNode(A):
+	G.add_node(A.bName)
+	name2node[A.bName] = A
+def delNode(A):
+	G.remove_node(A.bName)
+	name2node.pop(A.bName)
 def addEdge(A,B):
+	if not A.bName in name2node:
+		name2node[A.bName] = A
+	if not B.bName in name2node:
+		name2node[B.bName] = B
 	G.add_edge(A.bName,B.bName)
+	if not nx.is_directed_acyclic_graph(G):
+		G.remove_edge(A.bName,B.bName)
+		raise Exception('cyclic link')
 def delEdge(A,B):
 	G.remove_edge(A.bName,B.bName)
-def rename(fname,tname):
+def nodeRename(fname,tname):
+	if tname in name2node:
+		raise Exception('Dup name')
 	from_edges = G.edges()
 	to_edges = []
 	for e in from_edges:
 		x = tname if e[0] == fname else e[0]
 		y = tname if e[1] == fname else e[1]
 		to_edges.append((x,y))
-	G = nx.DiGraph()
+	from_nodes = G.nodes()
+	to_nodes = []
+	for n in from_nodes:
+		if n == fname:
+			to_nodes.append(tname)
+		else:
+			to_nodes.append(n)
+	G.clear()
+	name2node[tname] = name2node[fname]
+	name2node.pop(fname)
 	G.add_edges_from(to_edges)
+	G.add_nodes_from(to_nodes)
 def getDep(node):
 	anc = nx.ancestors(G,node.bName)
 	ts = nx.topological_sort(G)
@@ -28,12 +51,22 @@ def getDep(node):
 	for x in ts:
 		if x in anc:
 			res.append(x)
+	res = [name2node[x] for x in res]
 	return res
-#def showStructure():
-#	pos = nx.spring_layout(G)
-#	nx.draw(G,pos)
-#	nx.draw_networkx_labels(G,pos)
-#	plt.show()
+pltEnabled = True
+try:
+	import matplotlib.pyplot as plt
+except:
+	pltEnabled = False
+def getGraph():
+	if not pltEnabled:
+		return 'plt not enabled'
+	pos = nx.spring_layout(G)
+	nx.draw_networkx_nodes(G,pos)
+	nx.draw_networkx_edges(G,pos)
+	nx.draw_networkx_labels(G,pos)
+	plt.savefig('currentStructure.png')
+	return ''
 class test:
 	def __init__(self,x):
 		self.bName = x

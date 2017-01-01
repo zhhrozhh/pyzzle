@@ -10,6 +10,7 @@ from PyQt4 import QtCore, QtGui
 import subprocess
 import pyhighlighter
 from uniFunc import *
+from linkstructure import *
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -66,12 +67,14 @@ class Ui_PY_block(object):
         self.inpSize = (440,410)
         self.testSize = (270,460)
         self.anc = []
+        self.toDel = None
         x = 'untitled_'
         ini = 0
         global allName
         while x+str(ini) in allName:
             ini+=1
         self.bName = x+str(ini)
+        addNode(self)
         allName.append(self.bName)
     def setMainWindow(self,mainWindow):
         self.mainWindow = mainWindow
@@ -194,7 +197,7 @@ class Ui_PY_block(object):
         QtCore.QObject.connect(self.showRelation, QtCore.SIGNAL(_fromUtf8("clicked()")), self.hideRelation.show)
         QtCore.QObject.connect(self.showRelation, QtCore.SIGNAL(_fromUtf8("clicked()")), self.showRelation.hide)
         QtCore.QObject.connect(self.hideTestField, QtCore.SIGNAL(_fromUtf8("clicked()")), self.showTestField.show)
-        #QtCore.QObject.connect(self.blockName, QtCore.SIGNAL(_fromUtf8("textChanged(QString)")), self.setName)
+
         QtCore.QObject.connect(self.min, QtCore.SIGNAL(_fromUtf8("clicked()")), self.f_hideInp)
         QtCore.QObject.connect(self.min, QtCore.SIGNAL(_fromUtf8("clicked()")), self.f_hideTest)
         QtCore.QObject.connect(self.min, QtCore.SIGNAL(_fromUtf8("clicked()")), self.f_hideRelation)
@@ -210,6 +213,12 @@ class Ui_PY_block(object):
         QtCore.QObject.connect(self.max, QtCore.SIGNAL(_fromUtf8("clicked()")), self.showTestField.show)
         QtCore.QObject.connect(self.max, QtCore.SIGNAL(_fromUtf8("clicked()")), self.hideRelation.hide)
         QtCore.QObject.connect(self.max, QtCore.SIGNAL(_fromUtf8("clicked()")), self.hideTestField.hide)
+
+        QtCore.QObject.connect(self.linkedIn,QtCore.SIGNAL(_fromUtf8('itemActivated(QListWidgetItem*)')),self.toDelNode)
+        QtCore.QObject.connect(self.linkedOut,QtCore.SIGNAL(_fromUtf8('itemActivated(QListWidgetItem*)')),self.toDelNode)
+
+        QtCore.QObject.connect(self.linkin,QtCore.SIGNAL(_fromUtf8('clicked()')),self.linkToRequest)
+        QtCore.QObject.connect(self.linkout,QtCore.SIGNAL(_fromUtf8('clicked()')),self.linkFromRequest)
         QtCore.QMetaObject.connectSlotsByName(PY_block)
 
         self.f_hideRelation()
@@ -266,13 +275,18 @@ class Ui_PY_block(object):
         self.groupBox.setGeometry(QtCore.QRect(r.width(),20+tt.height(),i.width(),i.height()))
         self.test.setGeometry(QtCore.QRect(r.width()+max(tt.width(),i.width()),10,t.width(),t.height()))
         self.PY_block.resize(w,h)
-    def getSourceText(self):
+    def getUnlinkedSource(self):
+        return str(self.pyInput.toPlainText())
+    def getLinkedSource(self):
+        dep = getDep(self)
         res = ''
-        for x in self.lIn:
-            res+=x.getSourceText()
-            res+='\n'
-        res+=str(self.pyInput.toPlainText())
+        for node in dep:
+            res += node.getUnlinkedSource()
+            res += '\n'
+        res += self.getUnlinkedSource()
         return res
+    def getSourceText(self):
+        return self.getLinkedSource()
     def testQ(self):
         testText = self.getSourceText()+'\n'+str(self.plainTextEdit.toPlainText())
         tf = open('test.py','w')
@@ -306,13 +320,67 @@ class Ui_PY_block(object):
         allName.append(self.bName)
         self.PY_block.setWindowTitle(_translate("PY_block", self.bName, None))
         for i in self.lIn:
-            i.reName(fname,self.bname)
+            i.reName(fname,self.bName)
         for o in self.lOut:
-            o.reName(fname,self.bname)
+            o.reName(fname,self.bName)
+        nodeRename(fname,self.bName)
     def linkToRequest(self):
-        pass
+        global linkObj,linkTarget
+        overwriteWarning = False
+        if linkObj != None:
+            overwriteWarning = True
+        if linkTarget == None:
+            linkObj = self
+        else:
+            addEdge(self,linkTarget)
+            self.f_linkOut(linkTarget)
+            linkTarget.f_linkIn(self)
+            linkTarget = None
+        if overwriteWarning:
+            raise Exception('linkObjOW')
     def linkFromRequest(self):
-        pass
+        global linkObj,linkTarget
+        overwriteWarning = False
+        if linkTarget != None:
+            overwriteWarning = True
+        if linkTarget == None:
+            linkTarget = self
+        else:
+            addEdge(linkObj,self)
+            self.f_linkIn(linkObj)
+            linkObj.f_linkOut(self)
+            linkObj = None
+        if overwriteWarning:
+            raise Exception('linkTargOW')
+    def f_linkIn(self,oth):
+        item = QtGui.QListWidgetItem()
+        item.setText(oth.bName)
+        self.linkedIn.addItem(item)
+    def f_linkOut(self,oth):
+        item = QtGui.QListWidgetItem()
+        item.setText(oth.bName)
+        self.linkedOut.addItem(item)
+    def toDelNode(self,w):
+        self.toDel = w
+    def delNode(self):
+        xname = self.toDel.text()
+        try:
+            self.linkedIn.removeItemWidget(self.toDel)
+        except:
+            self.linkedOut.removeItemWidget(self.toDel)
+        for index in range(self.toDel.linkedIn.count()):
+            if self.toDel.linkedIn.item(index).text() == self.bName:
+                self.toDel.linkedIn.removeItemWidget()
+                break
+        for index in range(self.toDel.linkedOut.count()):
+            if self.toDel.linkedOut.item(index).text() == self.bName:
+                self.toDel.linkedOut.removeItemWidget()
+                break
+        try:
+            delEdge(self,self.toDel)
+        except:
+            delEdge(self.toDel,self)
+        self.toDel = None
     def reName(self,fname,neoName):
         pass
     def copyBlock(self):

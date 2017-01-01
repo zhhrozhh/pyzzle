@@ -2,6 +2,8 @@ labelPool = list(range(2000))
 pSet = {}
 allWindow = []
 allName = []
+linkObj = None
+linkTarget = None
 def getLabel():
 	global labelPool
 	return labelPool.pop(0)

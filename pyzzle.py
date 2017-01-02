@@ -21,7 +21,6 @@ try:
 except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
@@ -36,21 +35,21 @@ class Ui_MainWindow(object):
         self.bt_addBlock = QtGui.QPushButton(self.verticalLayoutWidget)
         self.bt_addBlock.setObjectName(_fromUtf8("bt_addBlock"))
         self.verticalLayout.addWidget(self.bt_addBlock)
-        self.pushButton = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.verticalLayout.addWidget(self.pushButton)
-        self.pushButton_3 = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
-        self.verticalLayout.addWidget(self.pushButton_3)
-        self.pushButton_4 = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.pushButton_4.setObjectName(_fromUtf8("pushButton_4"))
-        self.verticalLayout.addWidget(self.pushButton_4)
-        self.pushButton_5 = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.pushButton_5.setObjectName(_fromUtf8("pushButton_5"))
-        self.verticalLayout.addWidget(self.pushButton_5)
-        self.pushButton_6 = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.pushButton_6.setObjectName(_fromUtf8("pushButton_6"))
-        self.verticalLayout.addWidget(self.pushButton_6)
+        self.bt_save = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.bt_save.setObjectName(_fromUtf8("bt_save"))
+        self.verticalLayout.addWidget(self.bt_save)
+        self.bt_ld = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.bt_ld.setObjectName(_fromUtf8("bt_ld"))
+        self.verticalLayout.addWidget(self.bt_ld)
+        self.bt_sp = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.bt_sp.setObjectName(_fromUtf8("bt_sp"))
+        self.verticalLayout.addWidget(self.bt_sp)
+        self.bt_font = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.bt_font.setObjectName(_fromUtf8("bt_font"))
+        self.verticalLayout.addWidget(self.bt_font)
+        self.bt_exit = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.bt_exit.setObjectName(_fromUtf8("bt_exit"))
+        self.verticalLayout.addWidget(self.bt_exit)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 149, 31))
         self.menubar.setObjectName(_fromUtf8("menubar"))
@@ -64,11 +63,11 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
         self.bt_addBlock.setText(_translate("MainWindow", "Add Block", None))
-        self.pushButton.setText(_translate("MainWindow", "Save", None))
-        self.pushButton_3.setText(_translate("MainWindow", "Load", None))
-        self.pushButton_4.setText(_translate("MainWindow", "PushButton", None))
-        self.pushButton_5.setText(_translate("MainWindow", "PushButton", None))
-        self.pushButton_6.setText(_translate("MainWindow", "PushButton", None))
+        self.bt_save.setText(_translate("MainWindow", "Save", None))
+        self.bt_ld.setText(_translate("MainWindow", "Load", None))
+        self.bt_sp.setText(_translate("MainWindow", "switch python", None))
+        self.bt_font.setText(_translate("MainWindow", "font", None))
+        self.bt_exit.setText(_translate("MainWindow", "exit", None))
 
     def newPyBlockWindow(self):
         PY_block = QtGui.QWidget()
@@ -78,7 +77,6 @@ class Ui_MainWindow(object):
         PY_block.show()
         global allWindow
         allWindow.append((ui,PY_block))
-        #return ui,PY_block
 import sys
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

@@ -1,3 +1,3 @@
 # pyzzle
-breakdown long python codes into short blocks
+breakdown long python codes into small blocks
 <img src = 'demo.png'/>

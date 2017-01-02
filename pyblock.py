@@ -112,6 +112,17 @@ class Ui_PY_block(object):
         self.label_3.setGeometry(QtCore.QRect(60, 20, 53, 16))
         self.label_3.setObjectName(_fromUtf8("label_3"))
 
+        self._del = QtGui.QPushButton(self.Relation)
+        self._del.setGeometry(QtCore.QRect(10, 420, 40, 20))
+        self._del.setObjectName(_fromUtf8("_del"))
+        self._del.setText('del')
+
+        self._show = QtGui.QPushButton(self.Relation)
+        self._show.setGeometry(QtCore.QRect(50, 420, 50, 20))
+        self._show.setObjectName(_fromUtf8("_show"))
+        self._show.setText('show')
+
+
 
         self.test = QtGui.QGroupBox(PY_block)
         self.test.setGeometry(QtCore.QRect(600, 10, 270, 460))
@@ -153,6 +164,15 @@ class Ui_PY_block(object):
         self.max.setGeometry(QtCore.QRect(180, 0, 31, 28))
         self.max.setObjectName(_fromUtf8("max"))
 
+        self.pin = QtGui.QPushButton(self.titleBox)
+        self.pin.setGeometry(QtCore.QRect(210, 0, 32, 28))
+        self.pin.setObjectName(_fromUtf8("pin"))
+        self.pin.setText('pin')
+
+        self.merge = QtGui.QPushButton(self.titleBox)
+        self.merge.setGeometry(QtCore.QRect(240, 0, 60, 28))
+        self.merge.setObjectName(_fromUtf8("merge"))
+        self.merge.setText('merge')
 
         self.groupBox = QtGui.QGroupBox(PY_block)
         self.groupBox.setGeometry(QtCore.QRect(160, 60, 440, 410))
@@ -219,6 +239,8 @@ class Ui_PY_block(object):
 
         QtCore.QObject.connect(self.linkin,QtCore.SIGNAL(_fromUtf8('clicked()')),self.linkToRequest)
         QtCore.QObject.connect(self.linkout,QtCore.SIGNAL(_fromUtf8('clicked()')),self.linkFromRequest)
+
+        QtCore.QObject.connect(self._del,QtCore.SIGNAL(_fromUtf8('clicked()')),self.delNode)
         QtCore.QMetaObject.connectSlotsByName(PY_block)
 
         self.f_hideRelation()
@@ -294,10 +316,11 @@ class Ui_PY_block(object):
         tf.close()
         pipes = subprocess.Popen(['python','test.py'],stdout = subprocess.PIPE,stderr = subprocess.PIPE)
         std_out,std_err = pipes.communicate()
+        res = std_out.decode('utf-8')
         if pipes.returncode != 0:
-            self.TestResult.setText(std_err.decode('utf-8'))
-        else:
-            self.TestResult.setText(std_out.decode('utf-8'))
+            res += std_err.decode('utf-8')
+        #else:
+        self.TestResult.setText(res)
     def keyHandle(self,event):
         if event=='testQ':
             self.testQ()
@@ -319,10 +342,10 @@ class Ui_PY_block(object):
         allName.remove(fname)
         allName.append(self.bName)
         self.PY_block.setWindowTitle(_translate("PY_block", self.bName, None))
-        for i in self.lIn:
-            i.reName(fname,self.bName)
-        for o in self.lOut:
-            o.reName(fname,self.bName)
+        for i in range(self.linkedIn.count()):
+            name2node[self.linkedIn.item(i).text()].reName(fname,self.bName)
+        for i in range(self.linkedOut.count()):
+            name2node[self.linkedOut.item(i).text()].reName(fname,self.bName)
         nodeRename(fname,self.bName)
     def linkToRequest(self):
         global linkObj,linkTarget
@@ -363,32 +386,45 @@ class Ui_PY_block(object):
     def toDelNode(self,w):
         self.toDel = w
     def delNode(self):
+        if self.toDel == None:
+            raise('Nothing to del')
         xname = self.toDel.text()
-        try:
-            self.linkedIn.removeItemWidget(self.toDel)
-        except:
-            self.linkedOut.removeItemWidget(self.toDel)
-        for index in range(self.toDel.linkedIn.count()):
-            if self.toDel.linkedIn.item(index).text() == self.bName:
-                self.toDel.linkedIn.removeItemWidget()
+        tdNode = name2node[xname]
+        if self.linkedIn.row(self.toDel)!=-1:
+            self.linkedIn.takeItem(self.linkedIn.row(self.toDel))
+        else:
+            self.linkedOut.takeItem(self.linkedOut.row(self.toDel))
+        for index in range(tdNode.linkedIn.count()):
+            if tdNode.linkedIn.item(index).text() == self.bName:
+                tdNode.linkedIn.takeItem(index)
                 break
-        for index in range(self.toDel.linkedOut.count()):
-            if self.toDel.linkedOut.item(index).text() == self.bName:
-                self.toDel.linkedOut.removeItemWidget()
+        for index in range(tdNode.linkedOut.count()):
+            if tdNode.linkedOut.item(index).text() == self.bName:
+                tdNode.linkedOut.takeItem(index)
                 break
         try:
-            delEdge(self,self.toDel)
+            delEdge(self,tdNode)
         except:
-            delEdge(self.toDel,self)
+            delEdge(tdNode,self)
         self.toDel = None
-    def reName(self,fname,neoName):
-        pass
+    def reName(self,fname,tname):
+        for i in range(self.linkedIn.count()):
+            if self.linkedIn.item(i).text() == fname:
+                self.linkedIn.item(i).setText(tname)
+                break
+        for i in range(self.linkedOut.count()):
+            if self.linkedOut.item(i).text() == fname:
+                self.linkedOut.item(i).setText(tname)
+                break
     def copyBlock(self):
         self.mainWindow.copyBlock(self)
 import sys
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    x,y = newBlockWindow(1)
-    z,w = newBlockWindow(2)
+    PY_block = QtGui.QWidget()
+    ui = Ui_PY_block()
+    ui.setMainWindow(1)
+    ui.setupUi(PY_block)
+    PY_block.show()
     sys.exit(app.exec_())

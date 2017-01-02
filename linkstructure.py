@@ -1,8 +1,6 @@
 import sys
-try:
-	sys.path.append('C:\\Program Files\\Anaconda3\\lib\\site-packages')
-except:
-	pass
+sys.path.append('C:\\Program Files\\Anaconda3\\lib\\site-packages')
+import matplotlib.pyplot as plt
 import networkx as nx
 name2node = {}
 G = nx.DiGraph()
@@ -53,18 +51,16 @@ def getDep(node):
 			res.append(x)
 	res = [name2node[x] for x in res]
 	return res
-pltEnabled = True
-try:
-	import matplotlib.pyplot as plt
-except:
-	pltEnabled = False
 def getGraph():
-	if not pltEnabled:
-		return 'plt not enabled'
-	pos = nx.spring_layout(G)
-	nx.draw_networkx_nodes(G,pos)
-	nx.draw_networkx_edges(G,pos)
-	nx.draw_networkx_labels(G,pos)
+	plt.clf()
+	pos = nx.spring_layout(G,scale = 0.3)
+	nx.draw(G,pos,arrows = True,with_labels = True,font_size = 20)
+	#nx.draw_networkx_nodes(G,pos)
+	#nx.draw_networkx_edges(G,pos)
+	#nx.draw_networkx_labels(G,pos)
+
+	plt.axis('off')
+	plt.grid(True)
 	plt.savefig('currentStructure.png')
 	return ''
 class test:

@@ -8,6 +8,7 @@
 
 from PyQt4 import QtCore, QtGui
 from pyblock import *
+import sys
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -24,7 +25,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(149, 403)
+        MainWindow.resize(500, 400)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayoutWidget = QtGui.QWidget(self.centralwidget)
@@ -44,14 +45,32 @@ class Ui_MainWindow(object):
         self.bt_sp = QtGui.QPushButton(self.verticalLayoutWidget)
         self.bt_sp.setObjectName(_fromUtf8("bt_sp"))
         self.verticalLayout.addWidget(self.bt_sp)
+
         self.bt_font = QtGui.QPushButton(self.verticalLayoutWidget)
         self.bt_font.setObjectName(_fromUtf8("bt_font"))
         self.verticalLayout.addWidget(self.bt_font)
+
+        self.bt_cmd = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.bt_cmd.setObjectName(_fromUtf8("bt_cmd"))
+        self.verticalLayout.addWidget(self.bt_cmd)
+
+        #self.bt_G = QtGui.QPushButton(self.verticalLayoutWidget)
+        #self.bt_G.setObjectName(_fromUtf8("bt_G"))
+        #self.verticalLayout.addWidget(self.bt_G)
+
+
+        self.currentStructure = QtGui.QLabel(MainWindow)
+        self.showCurrentGraph()
+        #self.pixmap = QtGui.QPixmap('currentStructure.png').scaled(350,350,QtCore.Qt.KeepAspectRatio)
+        #self.currentStructure.setPixmap(self.pixmap)
+        self.currentStructure.setGeometry(110,0,350,350)
+
+
         self.bt_exit = QtGui.QPushButton(self.verticalLayoutWidget)
         self.bt_exit.setObjectName(_fromUtf8("bt_exit"))
         self.verticalLayout.addWidget(self.bt_exit)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 149, 31))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 100, 31))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
@@ -60,6 +79,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         QtCore.QObject.connect(self.bt_addBlock,QtCore.SIGNAL(_fromUtf8('clicked()')),self.newPyBlockWindow)
 
+        #QtCore.QObject.connect(self.bt_G,QtCore.SIGNAL(_fromUtf8('clicked()')),self.showCurrentGraph)
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
         self.bt_addBlock.setText(_translate("MainWindow", "Add Block", None))
@@ -67,17 +87,24 @@ class Ui_MainWindow(object):
         self.bt_ld.setText(_translate("MainWindow", "Load", None))
         self.bt_sp.setText(_translate("MainWindow", "switch python", None))
         self.bt_font.setText(_translate("MainWindow", "font", None))
+        self.bt_cmd.setText(_translate("MainWindow","cmd mode",None))
+        #self.bt_G.setText(_translate("MainWindow","show graph",None))
         self.bt_exit.setText(_translate("MainWindow", "exit", None))
 
     def newPyBlockWindow(self):
         PY_block = QtGui.QWidget()
-        ui = Ui_PY_block()
-        ui.setMainWindow(self)
+        ui = Ui_PY_block(self)
+        #ui.setMainWindow(self)
         ui.setupUi(PY_block)
         PY_block.show()
         global allWindow
         allWindow.append((ui,PY_block))
-import sys
+    def showCurrentGraph(self):
+        getGraph()
+        self.pixmap = QtGui.QPixmap('currentStructure.png').scaled(350,350,QtCore.Qt.KeepAspectRatio)
+        self.currentStructure.setPixmap(self.pixmap)
+
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     Pyzzle = QtGui.QWidget()

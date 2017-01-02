@@ -62,7 +62,8 @@ class PY_TEST_Edit(QtGui.QPlainTextEdit):
         self.NL = False
 
 class Ui_PY_block(object):
-    def __init__(self):
+    def __init__(self,mainWindow):
+        self.mainWindow = mainWindow
         self.relationSize = (162,460)
         self.inpSize = (440,410)
         self.testSize = (270,460)
@@ -75,6 +76,7 @@ class Ui_PY_block(object):
             ini+=1
         self.bName = x+str(ini)
         addNode(self)
+        mainWindow.showCurrentGraph()
         allName.append(self.bName)
     def setMainWindow(self,mainWindow):
         self.mainWindow = mainWindow
@@ -347,6 +349,7 @@ class Ui_PY_block(object):
         for i in range(self.linkedOut.count()):
             name2node[self.linkedOut.item(i).text()].reName(fname,self.bName)
         nodeRename(fname,self.bName)
+        self.mainWindow.showCurrentGraph()
     def linkToRequest(self):
         global linkObj,linkTarget
         overwriteWarning = False
@@ -356,6 +359,7 @@ class Ui_PY_block(object):
             linkObj = self
         else:
             addEdge(self,linkTarget)
+            self.mainWindow.showCurrentGraph()
             self.f_linkOut(linkTarget)
             linkTarget.f_linkIn(self)
             linkTarget = None
@@ -366,10 +370,11 @@ class Ui_PY_block(object):
         overwriteWarning = False
         if linkTarget != None:
             overwriteWarning = True
-        if linkTarget == None:
+        if linkObj == None:
             linkTarget = self
         else:
             addEdge(linkObj,self)
+            self.mainWindow.showCurrentGraph()
             self.f_linkIn(linkObj)
             linkObj.f_linkOut(self)
             linkObj = None
@@ -407,6 +412,7 @@ class Ui_PY_block(object):
         except:
             delEdge(tdNode,self)
         self.toDel = None
+        self.mainWindow.showCurrentGraph()
     def reName(self,fname,tname):
         for i in range(self.linkedIn.count()):
             if self.linkedIn.item(i).text() == fname:
